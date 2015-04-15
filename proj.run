@@ -6,3 +6,4 @@ solve;
 display SplitterUsed;
 #display FiberUsed;
 display TotalCost;
+display SplittersInNode;

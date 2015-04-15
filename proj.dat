@@ -32,9 +32,9 @@ OLT			2
 CAB1		2
 CAB2		2
 AP1 		2
-AP2 		2
-AP3 		2
-AP4 		2;
+AP2 		9
+AP3 		8
+AP4 		5;
 
 param: 		splitter_cost 	splitter_output :=
 XXX01		0				1

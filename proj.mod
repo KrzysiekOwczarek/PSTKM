@@ -28,6 +28,7 @@ param terminates {n in NODES, (i,j) in ALL_LINKS} binary :=
       if (j = n) then 1 else 0;							# bl z zadania
 
 var SplitterUsed {s in SPLITTERS} >= 0 integer;
+var SplittersInNode {n in NODES, s in SPLITTERS} >= 0 integer;
 #var FiberUsed {c in CABLES} >= card(ALL_LINKS) integer;
 #var SignalUsed {c in CABLES} >= 1 integer;
 var Traffic {(i,j) in ALL_LINKS} >= 0, <= demand[i,j];
@@ -43,10 +44,21 @@ subject to SplitterNumber:
  	sum {s in SPLITTERS} SplitterUsed[s] <=
  	(sum {a in APS} children[a] + card(CABINETS) + card(APS));
   
-#subject to K3:
-#	sum {s in SPLITTERS} SplitterUsed[s] <= card(NODES) 
-subject to K2{s in SPLITTERS, n in NODES}:
-	splitter_output[s] >= children[n];
+subject to K3{n in NODES}:
+	(sum {s in SPLITTERS} SplittersInNode[n, s] * splitter_output[s]) >= children[n];
+
+subject to K4{n in NODES}:
+	(sum {s in SPLITTERS} SplittersInNode[n, s]) = 1;
+	#suma spliterów w nodzie potem na byæ liczba fiberów
+	
+subject to K5{s in SPLITTERS}:
+	(sum {n in NODES} SplittersInNode[n, s]) = SplitterUsed[s];
+	#suma spliterów danego typu
+	
+#subject to K5{n in NODES, s in SPLITTERS}:
+#	SplitterUsed[s] * splitter_output[s];
+#subject to K2{s in SPLITTERS, n in NODES}:
+#	8 >= splitter_output[s] >= children[n];
 #subject to FiberNumber:
 #	sum {c in CABLES} (FiberUsed[c] * fibers[c]) <= N;
 	
