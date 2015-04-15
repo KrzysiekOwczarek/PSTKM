@@ -1,0 +1,8 @@
+reset;
+model proj.mod;
+data proj.dat;
+option solver cplex;
+solve;
+display SplitterUsed;
+#display FiberUsed;
+display TotalCost;
