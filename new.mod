@@ -2,7 +2,7 @@ set OLT;
 set CABINETS;
 set APS;
 set CLIENTS;
-set EDGES within {(OLT cross CABINETS) union (CABINETS cross APS)};
+set EDGES within {(OLT cross CABINETS) union (CABINETS cross APS) union (APS cross CLIENTS)};
 set DEMANDS;
 set SPLITTERS;
 
@@ -23,9 +23,7 @@ param originates {n in NODES, (i,j) in EDGES} binary :=
 param terminates {n in NODES, (i,j) in EDGES} binary :=
       if (j = n) then 1 else 0;							# bl z zadania
 
-#ar traffic {(i,j) in EDGES, d in DEMANDS} binary;
 var splitters {s in SPLITTERS} >= 0 integer;
-var Traffic {(i,j) in EDGES, d in DEMANDS} >= 0, <= demand_val[d];
 var splittersInNodes {s in SPLITTERS, n in NODES} >= 0 integer;
 
 minimize TotalCost: sum {s in SPLITTERS} splitter_cost[s] * splitters[s];
@@ -34,17 +32,11 @@ subject to GlobalSplits:
 	(sum {a in APS} ap_clients[a] + card(CABINETS) + card(APS))
 	<= sum {s in SPLITTERS} (splitters[s] * splitter_output[s]) <= N;
 	
-#subject to needs:
-#	sum {n in NODES} (sum {(i,j) in EDGES, d in DEMANDS} outgoing[i,j,n] * source[d,n]* demand_val[d])
-#	<= sum{s in SPLITTERS} splitters[s] * splitter_output[s];
-
-subject to T{n in NODES}: #Liczba splittow per node = liczby polaczen wychodzacych z node
-	sum {s in SPLITTERS} splittersInNodes[s,n] * splitter_output[s] = sum {(i,j) in EDGES} outgoing[i,j,n];
-	 
-#subject to O{n in NODES}: #Liczba splitterow per node >=(?=) liczbie polaczen wchodzacych do node
-#	sum {s in SPLITTERS} splittersInNodes[s,n] = sum {(i,j) in EDGES} incoming[i,j,n];
-subject to K4{n in NODES}:
-	(sum {s in SPLITTERS} splittersInNodes[s, n]) = 1;	
-#subject to R{s in SPLITTERS}:
-#	sum {n in NODES} splittersInNodes[s,n] = splitters[s];
+subject to O{n in NODES}: #Liczba splitterow per node >=(?=) liczbie polaczen wchodzacych do node
+	sum {s in SPLITTERS} splittersInNodes[s,n] = sum {(i,j) in EDGES} incoming[i,j,n];
 	
+subject to D{s in SPLITTERS}:
+	(sum {n in NODES} splittersInNodes[s, n]) = splitters[s];
+	
+subject to T{n in NODES}: #Liczba SPLITTÓW per node = liczby polaczen wychodzacych z node
+	sum {s in SPLITTERS} splittersInNodes[s,n] * splitter_output[s] = sum {(i,j) in EDGES} outgoing[i,j,n];
