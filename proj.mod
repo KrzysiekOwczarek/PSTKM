@@ -2,6 +2,7 @@ set OLT;
 set CABINETS;
 set APS;
 set NODES := CABINETS union APS union OLT;
+set NOLT := CABINETS union APS;
 set OLT_CAB_LINKS within (OLT cross CABINETS);
 set CAB_AP_LINKS within (CABINETS cross APS);
 
@@ -14,56 +15,50 @@ param clients_in_ap {APS} >= 0;
 param splitter_cost {SPLITTERS} >= 0;
 param splitter_output {SPLITTERS} >= 0;
 param fiber_cost_per_km {CABLES} >= 0;
-param fibers {CABLES} >= 0;
-param link_length {ALL_LINKS} >= 0;
-param demand {ALL_LINKS} >= 0;
+param link_length {NODES} >= 0;
 param children {NODES} >= 0;
+param fibers {CABLES} >= 0;
+param uchild {n in NODES, m in NODES} >= 0;
+param uparent {n in NODES, m in NODES} >= 0;
+param L >= 0;
 
-param M >= 0; # min clients to serve
-param N >= 0; # max splits of signal
+#param M >= 0; # min clients to serve
+#param N >= 0; # max splits of signal
 
-param originates {n in NODES, (i,j) in ALL_LINKS} binary :=
-      if (i = n) then 1 else 0;							# al z zadania
-param terminates {n in NODES, (i,j) in ALL_LINKS} binary :=
-      if (j = n) then 1 else 0;							# bl z zadania
 
-var SplitterUsed {s in SPLITTERS} >= 0 integer;
+
 var SplittersInNode {n in NODES, s in SPLITTERS} >= 0 integer;
-#var FiberUsed {c in CABLES} >= card(ALL_LINKS) integer;
-#var SignalUsed {c in CABLES} >= 1 integer;
-var Traffic {(i,j) in ALL_LINKS} >= 0, <= demand[i,j];
+var CableToNode {n in NODES, c in CABLES} >= 0 integer;
+var Fiberin {n in NODES} >=0 integer;
+var Fiberout {n in NODES} >=0 integer;
 
 minimize TotalCost:
-	(sum {s in SPLITTERS} splitter_cost[s] * SplitterUsed[s]);
+	(sum {s in SPLITTERS} splitter_cost[s] * (sum {n in NODES} SplittersInNode[n, s]))
+	+ (sum {c in CABLES, n in NODES} fiber_cost_per_km[c] * CableToNode[n, c] * link_length[n] );
+	#dodaæ koszt kabli
 	
-subject to GlobalSplits:
-	(sum {a in APS} children[a] + card(CABINETS) + card(APS))
-	<= sum {s in SPLITTERS} (SplitterUsed[s] * splitter_output[s]) <= N;
-
-subject to SplitterNumber:
- 	sum {s in SPLITTERS} SplitterUsed[s] <=
- 	(sum {a in APS} children[a] + card(CABINETS) + card(APS));
+subject to K1 {n in NODES}:
+	Fiberout[n] = (sum {m in NODES} uchild[n, m] * Fiberin[m]);
+	#liczba fiberów na wyjœciu to suma wejœæ do dzieci
+	
+subject to K2 {n in APS}:
+	L * Fiberin[n] >= children[n];
+#subject to GlobalSplits:
+#	(sum {a in APS} children[a] + card(CABINETS) + card(APS))
+#	<= sum {s in SPLITTERS} (SplitterUsed[s] * splitter_output[s]) <= N;
   
 subject to K3{n in NODES}:
-	(sum {s in SPLITTERS} SplittersInNode[n, s] * splitter_output[s]) >= children[n];
+	(sum {s in SPLITTERS} SplittersInNode[n, s] * splitter_output[s]) >= Fiberout[n];
+	#suma wyjœæ splitterów ma byæ wiêksza/równa fiberom wychodz¹cym
 
 subject to K4{n in NODES}:
-	(sum {s in SPLITTERS} SplittersInNode[n, s]) = 1;
-	#suma spliterów w nodzie potem na byæ liczba fiberów
+	(sum {s in SPLITTERS} SplittersInNode[n, s]) = Fiberin[n];
+	#suma spliterów w nodzie ma byæ równa fiberom wchodz¹cym
 	
-subject to K5{s in SPLITTERS}:
-	(sum {n in NODES} SplittersInNode[n, s]) = SplitterUsed[s];
-	#suma spliterów danego typu
+subject to K5 {n in NODES}:
+	(sum {c in CABLES} CableToNode[n, c]) = 1;
+	#1 wybrany kabel na ³¹czu
 	
-#subject to K5{n in NODES, s in SPLITTERS}:
-#	SplitterUsed[s] * splitter_output[s];
-#subject to K2{s in SPLITTERS, n in NODES}:
-#	8 >= splitter_output[s] >= children[n];
-#subject to FiberNumber:
-#	sum {c in CABLES} (FiberUsed[c] * fibers[c]) <= N;
-	
-#subject to SignalNumber:
-#	card(ALL_LINKS) <= sum {c in CABLES} SignalUsed[c] <= N
-	
-#subject to SignalTransmit:
-#	sum {c in CABLES} SignalUsed[c] >= sum {(i,j) in ALL_LINKS} demand[i,j];
+subject to K6 {n in NODES}:
+	(sum {c in CABLES} CableToNode[n, c] * fibers[c]) >= Fiberin[n];
+	#fibery w kablu maj¹ pomieœciæ fibery wymagane
