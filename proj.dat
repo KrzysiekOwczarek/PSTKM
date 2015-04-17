@@ -11,7 +11,7 @@ set LINKS :=
 (OLT, C2)
 (C1, A1)
 (C1, A2)
-(C2, A3)
+(C1, A3)
 (C2, A4);
 
 set CONNS :=
@@ -19,12 +19,12 @@ set CONNS :=
 
 param:		children :=
 OLT			2
-C1			2
+C1			3
 C2			2
-A1 			3
+A1 			1
 A2 			2
-A3 			5
-A4	 		2;
+A3 			1
+A4	 		3;
 
 param: 		splitter_cost 	splitter_output :=
 XXX01		0				1
@@ -35,12 +35,12 @@ PLC16		215.3			16
 PLC32		338.1			32
 PLC64		738				64;
 
-param: 		fiber_cost_per_km		fibers :=
-F1			1						1
-F2			4						2
-F3			3						3
-F4			4						4
-F5			5						5;
+param: 		fiber_cost_per_km		fibers 		signals_per_fiber	:=
+F1			1						1			1
+F2			4						2			2
+F3			3						3			2
+F4			4						4			2
+F5			5						5			2;
 
 param N 	:= 100; # Max splits JESZCZE SPLITY
 
@@ -64,10 +64,10 @@ C2 A4		0	0	0	0	0	0	1;
 
 ###
 param: 		link_length		demand 	:=
-OLT C1	 	2				4
-OLT C2 		2				4
+OLT C1	 	2				8
+OLT C2 		2				8
 C1 	A1 		2				2
 C1 	A2 		2				2
-C2 	A3 		2				2
-C2 	A4 		2				2;	
+C1 	A3 		2				2
+C2 	A4 		2				4;	
 				

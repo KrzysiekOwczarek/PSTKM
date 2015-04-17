@@ -15,6 +15,7 @@ param splitter_cost {SPLITTERS} >= 0;
 param splitter_output {SPLITTERS} >= 0;
 param fiber_cost_per_km {CABLES} >= 0;
 param fibers {CABLES} >= 0;
+param signals_per_fiber {CABLES} >= 1;
 param link_length {LINKS} >= 0;
 param demand {LINKS} >= 0;
 param children {NODES} >= 0;
@@ -24,9 +25,13 @@ param outgoing {(i,j) in LINKS, n in NODES};
 
 param N >= 0; # max splits of signal					# bl z zadania
 
+#check fiberow
+
+var SplitRatio {(i,j) in LINKS, s in SPLITTERS} >= 0 integer;
+	
+
 var SplittersInNode {n in NODES, s in SPLITTERS} >= 0 integer;
 var CablesInLink {(i,j) in LINKS, c in CABLES} >= 0 integer;
-var Splits {(i,j,k) in CONNS} >= 0 binary;
 
 minimize TotalCost:
 	(sum {s in SPLITTERS} splitter_cost[s] * (sum {n in NODES} SplittersInNode[n, s]))
@@ -42,19 +47,23 @@ subject to T{n in NODES}: #Liczba SPLITTÓW per node = liczby polaczen wychodzac
 	>= children[n];
 
 subject to K4{n in NODES}: #liczba spliterów
-	(sum {s in SPLITTERS} SplittersInNode[n, s]) = 1;
+	#(sum {s in SPLITTERS} SplittersInNode[n, s]) = 1;
+	(sum {s in SPLITTERS} SplittersInNode[n, s] * splitter_output[s])
+	>= sum {c in CABLES, (i,j) in LINKS: j == n} CablesInLink[i,j,c] * fibers[c];
+	
 	#suma spliter���w w nodzie potem na by��� liczba fiber���w
+	
 
 ## Zal. 1 fiber = 1 signal
 
 subject to A{(i,j) in LINKS}: #liczba sygnalow = demands zalozenie 1fiber = 1signal
-	sum {c in CABLES} CablesInLink[i,j,c] * fibers[c] >= demand[i,j];
+	sum {c in CABLES} CablesInLink[i,j,c] * fibers[c] * signals_per_fiber[c] >= demand[i,j];
 
 subject to AA{(i,j) in LINKS}: #max 1 kabel
 	sum {c in CABLES} CablesInLink[i,j,c] = 1;
 	
-subject to BBB{(i,j,k) in CONNS}: 
-	(sum {s in SPLITTERS} splitter_output[s] * SplittersInNode[i,s]) *
-	#(sum {s in SPLITTERS} splitter_output[s] * SplittersInNode[j,s]) *
-	(sum {s in SPLITTERS} splitter_output[s] * SplittersInNode[k,s])
-	<= N;
+#subject to BBB{(i,j,k) in CONNS}: 
+#	(sum {s in SPLITTERS} splitter_output[s] * SplittersInNode[i,s]) *
+#	(sum {s in SPLITTERS} splitter_output[s] * SplittersInNode[j,s]) *
+#	(sum {s in SPLITTERS} splitter_output[s] * SplittersInNode[k,s])
+#	<= N;
