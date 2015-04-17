@@ -33,33 +33,39 @@ var SplitRatio {(i,j) in LINKS, s in SPLITTERS} >= 0 integer;
 var SplittersInNode {n in NODES, s in SPLITTERS} >= 0 integer;
 var CablesInLink {(i,j) in LINKS, c in CABLES} >= 0 integer;
 
+var CablesToNode {n in NODES, c in CABLES} >= 0 integer;
+
 minimize TotalCost:
 	(sum {s in SPLITTERS} splitter_cost[s] * (sum {n in NODES} SplittersInNode[n, s]))
-	+ (sum {c in CABLES, (i,j) in LINKS} fiber_cost_per_km[c] * link_length[i,j]
-	* sum {(i,j) in LINKS} CablesInLink[i,j,c]);
+	+ (sum {c in CABLES, (i,j) in LINKS} fiber_cost_per_km[c] * link_length[i,j] * CablesInLink[i,j,c]);
 	
 #subject to HowManySplitters:
 # 	sum {s in SPLITTERS} SplitterUsed[s] <=
 # 	(sum {a in APS} children[a] + card(CABINETS) + card(APS));
 
+subject to SS {n in NODES}:
+	sum {s in SPLITTERS} SplittersInNode[n,s] <= sum{c in CABLES, i in NODES: (i,n) in LINKS} CablesInLink[i,n,c] * fibers[c];
+
 subject to T{n in NODES}: #Liczba SPLITTÓW per node = liczby polaczen wychodzacych z node
 	sum {s in SPLITTERS} SplittersInNode[n,s] * splitter_output[s] 
 	>= children[n];
 
-subject to K4{n in NODES}: #liczba spliterów
+subject to K4{i in NODES}: #liczba spliterów
 	#(sum {s in SPLITTERS} SplittersInNode[n, s]) = 1;
-	(sum {s in SPLITTERS} SplittersInNode[n, s] * splitter_output[s])
-	>= sum {c in CABLES, (i,j) in LINKS: j == n} CablesInLink[i,j,c] * fibers[c];
-	
+	#(sum {s in SPLITTERS} SplittersInNode[n, s] * splitter_output[s])
+	#>= sum {c in CABLES, (i,j) in LINKS: j == n} CablesInLink[i,j,c] * fibers[c];
+	sum {s in SPLITTERS} SplittersInNode[i,s] * splitter_output[s] >= sum {j in NODES, c in CABLES: (i,j) in LINKS} CablesInLink[i,j,c] * fibers[c];
 	#suma spliter���w w nodzie potem na by��� liczba fiber���w
-	
+
+#subject to FF{i in NODES}:
+#	sum {c in CABLES, j in NODES: (i,j) in LINKS} CablesInLink[i,j,c] * fibers[c] * signals_per_fiber[c] >= demand[i,j];
 
 ## Zal. 1 fiber = 1 signal
 
-subject to A{(i,j) in LINKS}: #liczba sygnalow = demands zalozenie 1fiber = 1signal
+subject to A{(i,j) in LINKS}: # liczba sygnalow = demands zalozenie 1fiber = 1signal (>=)
 	sum {c in CABLES} CablesInLink[i,j,c] * fibers[c] * signals_per_fiber[c] >= demand[i,j];
 
-subject to AA{(i,j) in LINKS}: #max 1 kabel
+subject to AA{(i,j) in LINKS}: # max 1 kabel
 	sum {c in CABLES} CablesInLink[i,j,c] = 1;
 	
 #subject to BBB{(i,j,k) in CONNS}: 

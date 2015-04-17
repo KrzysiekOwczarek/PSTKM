@@ -4,7 +4,7 @@ set OLT := OLT;
 set CABINETS := C1 C2;
 set APS := A1 A2 A3 A4;
 set SPLITTERS := XXX01 FBT02 PLC04 PLC08 PLC16 PLC32 PLC64;
-set CABLES := F1 F2 F3 F4 F5;
+set CABLES := F1 F2 F3 F4 F5 F6;
 
 set LINKS :=
 (OLT, C1) 
@@ -37,10 +37,11 @@ PLC64		738				64;
 
 param: 		fiber_cost_per_km		fibers 		signals_per_fiber	:=
 F1			1						1			1
-F2			4						2			2
+F2			2						2			2
 F3			3						3			2
-F4			4						4			2
-F5			5						5			2;
+F4			5						2			4
+F5			5						5			2
+F6			4						1			8;
 
 param N 	:= 100; # Max splits JESZCZE SPLITY
 
