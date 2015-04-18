@@ -26,12 +26,11 @@ param L >= 0;
 #param M >= 0; # min clients to serve
 #param N >= 0; # max splits of signal
 
-
-
 var SplittersInNode {n in NODES, s in SPLITTERS} >= 0 integer;
 var CableToNode {n in NODES, c in CABLES} >= 0 integer;
 var Fiberin {n in NODES} >=0 integer;
 var Fiberout {n in NODES} >=0 integer;
+
 
 
 minimize TotalCost:
@@ -46,10 +45,6 @@ subject to K1 {n in NAPS}:
 subject to K2 {n in APS}:
 	L * Fiberout[n] >= children[n];
 	#liczba sygna³ów w AP ma wystarczyæ dla klientów
-	
-#subject to GlobalSplits:
-#	(sum {a in APS} children[a] + card(CABINETS) + card(APS))
-#	<= sum {s in SPLITTERS} (SplitterUsed[s] * splitter_output[s]) <= N;
   
 subject to K3{n in NODES}:
 	(sum {s in SPLITTERS} SplittersInNode[n, s] * splitter_output[s]) >= Fiberout[n];
@@ -70,4 +65,8 @@ subject to K6 {n in NODES}:
 subject to K7 {n in OLT}:
 	Fiberin[n] = 1;#ile fiberów wchodzi z zewnatrz sieci dostêpowej
 	
+
+	
+#check:
+#6 >= ((sum {s in SPLITTERS} SplittersOLT) + (sum {s in SPLITTERS} SplittersCABS) + (sum {s in SPLITTERS} SplittersAPS));
 

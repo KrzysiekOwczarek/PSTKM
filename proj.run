@@ -9,3 +9,47 @@ display SplittersInNode;
 display Fiberin;
 display Fiberout;
 display CableToNode;
+
+var SplittersOLT {s in SPLITTERS} >= 0 integer;
+var SplittersCABS {s in SPLITTERS} >= 0 integer;
+var SplittersAPS {s in SPLITTERS} >= 0 integer;
+
+for {s in SPLITTERS} {
+
+	let SplittersOLT[s] := (sum {n in OLT} SplittersInNode[n, s]);
+	let SplittersCABS[s] := (sum {n in APS} SplittersInNode[n, s]);
+	let SplittersAPS[s] := (sum {n in CABINETS} SplittersInNode[n, s]);
+	
+}
+display SplittersOLT;
+display SplittersCABS;
+display SplittersAPS;
+
+param max1 default -100;
+param max2 default -100;
+param max3 default -100;
+param smax1 symbolic in SPLITTERS;
+param smax2 symbolic in SPLITTERS;
+param smax3 symbolic in SPLITTERS;
+	
+for {s in SPLITTERS} {
+        if (SplittersCABS[s] >= max1) then {
+            let max1 := SplittersCABS[s];
+            let smax1 := s;
+        }
+        if (SplittersOLT[s] >= max2) then {
+            let max2 := SplittersOLT[s];
+            let smax2 := s;
+        }
+        if (SplittersAPS[s] >= max2) then {
+            let max3 := SplittersAPS[s];
+            let smax3 := s;
+        }
+}
+display splitter_output[smax1];
+display splitter_output[smax2];
+display splitter_output[smax3];
+
+if (splitter_output[smax1] * splitter_output[smax2] * splitter_output[smax3] > 32) then {#tu wpisaæ max split
+	display "Maksymalny split przekroczony";
+}
