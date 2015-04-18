@@ -8,21 +8,19 @@ set LINKS within (OLT cross CABINETS) union (CABINETS cross APS);
 set CABLES;
 set SPLITTERS;
 
+param N := 20; # max splits of signal/max signals in fiber
 param splitter_cost {SPLITTERS} >= 0;
 param splitter_output {SPLITTERS} >= 0;
 param fiber_cost_per_km {CABLES} >= 0;
 param fibers {CABLES} >= 0;
-param signals_per_fiber {CABLES} >= 1;
+param signals_per_fiber {CABLES} <= N;
 param link_length {LINKS} >= 0;
 param demand {LINKS} >= 0;
 param children {NODES} >= 0;
 
-param N >= 0; # max splits of signal					# bl z zadania
-
-#check fiberow
-
 var SplittersInNode {n in NODES, s in SPLITTERS} >= 0 integer;
 var CablesInLink {(i,j) in LINKS, c in CABLES} >= 0 integer;
+var signalsInCable {c in CABLES} >= 0 integer;
 
 minimize TotalCost:
 	(sum {s in SPLITTERS} splitter_cost[s] * (sum {n in NODES} SplittersInNode[n, s]))
@@ -32,7 +30,7 @@ subject to A{n in NODES}: # splitter number per node == fibers incoming to node
 	sum {s in SPLITTERS} SplittersInNode[n,s]
 	== 
 	if n in OLT then
-		fibers['F2']
+		fibers['002-RB4-14101A20']
 	else
 		sum{c in CABLES, i in NODES: (i,n) in LINKS} CablesInLink[i,n,c] * fibers[c];
 
