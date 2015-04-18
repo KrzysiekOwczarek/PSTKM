@@ -1,6 +1,6 @@
 reset;
 model proj.mod;
-data proj.dat;
+data proj2.dat;
 option solver cplex;
 solve;
 display SplittersInNode;
