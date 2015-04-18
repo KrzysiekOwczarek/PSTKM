@@ -64,9 +64,3 @@ subject to K6 {n in NODES}:
 	
 subject to K7 {n in OLT}:
 	Fiberin[n] = 1;#ile fiberów wchodzi z zewnatrz sieci dostêpowej
-	
-
-	
-#check:
-#6 >= ((sum {s in SPLITTERS} SplittersOLT) + (sum {s in SPLITTERS} SplittersCABS) + (sum {s in SPLITTERS} SplittersAPS));
-
