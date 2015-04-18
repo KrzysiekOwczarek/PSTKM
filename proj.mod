@@ -3,6 +3,7 @@ set CABINETS;
 set APS;
 set NODES := CABINETS union APS union OLT;
 set NOLT := CABINETS union APS;
+set NAPS := OLT union CABINETS;
 set OLT_CAB_LINKS within (OLT cross CABINETS);
 set CAB_AP_LINKS within (CABINETS cross APS);
 
@@ -32,17 +33,20 @@ var CableToNode {n in NODES, c in CABLES} >= 0 integer;
 var Fiberin {n in NODES} >=0 integer;
 var Fiberout {n in NODES} >=0 integer;
 
+
 minimize TotalCost:
 	(sum {s in SPLITTERS} splitter_cost[s] * (sum {n in NODES} SplittersInNode[n, s]))
 	+ (sum {c in CABLES, n in NODES} fiber_cost_per_km[c] * CableToNode[n, c] * link_length[n] );
 	#dodaæ koszt kabli
 	
-subject to K1 {n in NODES}:
+subject to K1 {n in NAPS}:
 	Fiberout[n] = (sum {m in NODES} uchild[n, m] * Fiberin[m]);
-	#liczba fiberów na wyjœciu to suma wejœæ do dzieci
+	#liczba fiberów na wyjœciu to suma wejœæ do dzieci (nie dotyczy APSów)
 	
 subject to K2 {n in APS}:
-	L * Fiberin[n] >= children[n];
+	L * Fiberout[n] >= children[n];
+	#liczba sygna³ów w AP ma wystarczyæ dla klientów
+	
 #subject to GlobalSplits:
 #	(sum {a in APS} children[a] + card(CABINETS) + card(APS))
 #	<= sum {s in SPLITTERS} (SplitterUsed[s] * splitter_output[s]) <= N;
@@ -62,3 +66,8 @@ subject to K5 {n in NODES}:
 subject to K6 {n in NODES}:
 	(sum {c in CABLES} CableToNode[n, c] * fibers[c]) >= Fiberin[n];
 	#fibery w kablu maj¹ pomieœciæ fibery wymagane
+	
+subject to K7 {n in OLT}:
+	Fiberin[n] = 1;#ile fiberów wchodzi z zewnatrz sieci dostêpowej
+	
+

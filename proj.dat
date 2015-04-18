@@ -27,10 +27,10 @@ A3		0	0	1	0	0	0	0
 A4		0	0	1	0	0	0	0;
 
 param:		children :=
-A1 		2
-A2 		2
-A3 		2
-A4 		2;
+A1 		16
+A2 		11
+A3 		22
+A4 		28;
 
 param: 		splitter_cost 	splitter_output :=
 XXX01		0.5				1
@@ -42,11 +42,11 @@ PLC32		338.1			32
 PLC64		738				64;
 
 param: 	fiber_cost_per_km		fibers :=
-F1		40						1
-F2		70						2
-F3		120						4
-F4		210						8
-F5		400						16;
+F1		4						1
+F2		7						2
+F3		12						4
+F4		21						8
+F5		40						16;
 
 param: 		link_length :=
 OLT			0
@@ -59,4 +59,4 @@ A4			11;
 
 #param N 	:= 100; # Max splits JESZCZE SPLITY
 #param M 	:= 4; # Min clients
-param L 	:= 1;#signals in fiber 
+param L 	:= 5;#signals in fiber 
