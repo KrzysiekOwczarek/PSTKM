@@ -1,0 +1,8 @@
+reset;
+model proj.mod;
+data proj-non-trivial-1.dat;
+option solver cplex;
+solve;
+display SplittersInNode;
+display CablesInLink;
+display TotalCost;
