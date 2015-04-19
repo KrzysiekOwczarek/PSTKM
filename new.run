@@ -1,6 +1,0 @@
-reset;
-model new.mod;
-data new.dat;
-option solver cplex;
-solve;
-display splitters;

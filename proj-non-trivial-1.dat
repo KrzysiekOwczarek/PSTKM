@@ -1,7 +1,7 @@
 data;
 
 set OLT := OLT;
-set CABINETS := C1 C2 C3;
+set CABINETS := C1 C2;
 set APS := A1 A2 A3 A4;
 set SPLITTERS := XXX01 FBT02 PLC04 PLC08 PLC16 PLC32 PLC64;
 set CABLES := 
@@ -16,20 +16,18 @@ set OLT_CABLE := 001-RB4-14101A20;
 set LINKS :=
 (OLT, C1) 
 (OLT, C2)
-(OLT, C3)
 (C1, A1)
 (C1, A2)
 (C2, A3)
-(C3, A4);
+(C2, A4);
 
 param:		children :=
-OLT			3
+OLT			2
 C1			2
-C2			1
-C3			1
+C2			2
 A1 			2
-A2 			1
-A3 			3
+A2 			2
+A3 			2
 A4	 		2;
 
 param: 		splitter_cost 	splitter_output :=
@@ -50,11 +48,10 @@ param: 				fiber_cost_per_km		fibers 		signals_per_fiber	:=
 
 ###
 param: 		link_length		demand 	:=
-OLT C1	 	2				3
-OLT C2 		2				3
-OLT C3		2				2
-C1 	A1 		2				2
-C1 	A2 		2				1
-C2 	A3 		2				3
-C3 	A4 		2				2;	
+OLT C1	 	2				4
+OLT C2 		2				4
+C1 	A1 		3				2
+C1 	A2 		4				2
+C2 	A3 		3				2
+C2 	A4 		2				2;	
 				

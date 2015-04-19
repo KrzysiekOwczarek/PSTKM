@@ -42,7 +42,7 @@ param: 				fiber_cost_per_km		fibers 		signals_per_fiber	:=
 
 ###
 param: 		link_length		demand 	:=
-OLT C1	 	2				4
-C1 	A1 		2				2
-C1 	A2 		2				2;
+OLT C1	 	1				4
+C1 	A1 		1				2
+C1 	A2 		1				2;
 				
