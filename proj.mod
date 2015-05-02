@@ -10,10 +10,16 @@ set SPLITTERS;
 
 set OLT_CABLE;
 
-param N := 20; # max splits of signal/max signals in fiber
+set PAIRS within (SPLITTERS cross CABLES);
 
-param splitter_cost {SPLITTERS} >= 0;
-param splitter_output {SPLITTERS} >= 0;
+param N := 20; # max splits of signal/max signals in fiber
+param R := 10;
+
+param splitter_cost {SPLITTERS, CABLES} >= 0;
+param splitter_output {SPLITTERS, CABLES} >= 0;
+
+#param splitter_cost {SPLITTERS} >= 0;
+#param splitter_output {SPLITTERS} >= 0;
 param fiber_cost_per_km {CABLES} >= 0;
 param fibers {CABLES} >= 0;
 param signals_per_fiber {CABLES} <= N;
@@ -22,14 +28,14 @@ param demand {LINKS} >= 0;
 param children {NODES} >= 0;
 
 check: sum {(i,j) in LINKS} (if (i=j) then 1 else 0) = 0; # warunek braku petli (lacza z n do n)
-check: card(OLT_CABLE) = 1; # warunek na 1 kabel zasilający OLT
+check: card(OLT_CABLE) = 1; # warunek na 1 kabel zasilaj������������������������������������������������������cy OLT
 
 var SplittersInNode {n in NODES, s in SPLITTERS} >= 0 integer;
 var CablesInLink {(i,j) in LINKS, c in CABLES} >= 0 integer;
 
 minimize TotalCost:
-	(sum {s in SPLITTERS} splitter_cost[s] * (sum {n in NODES} SplittersInNode[n, s]))
-	+ (sum {c in CABLES, (i,j) in LINKS} fiber_cost_per_km[c] * link_length[i,j] * CablesInLink[i,j,c]);
+	sum { s in SPLITTERS, c in CABLES: (s,c) in PAIRS} splitter_cost[s,c] * sum {n in NODES} SplittersInNode[n,s]
+	+ sum {c in CABLES, (i,j) in LINKS} fiber_cost_per_km[c] * link_length[i,j] * CablesInLink[i,j,c];
 
 subject to SplittersNumberPerNode{n in NODES}: # splitter number per node == fibers incoming to node
 	sum {s in SPLITTERS} SplittersInNode[n,s]
@@ -40,11 +46,12 @@ subject to SplittersNumberPerNode{n in NODES}: # splitter number per node == fib
 		sum{c in CABLES, i in NODES: (i,n) in LINKS} CablesInLink[i,n,c] * fibers[c];
 
 subject to SumOfSplitsPerNode{n in NODES}: # outputs >= children
-	sum {s in SPLITTERS} SplittersInNode[n,s] * splitter_output[s] >= children[n];
+	sum {s in SPLITTERS, c in CABLES: (s,c) in PAIRS} SplittersInNode[n,s] * splitter_output[s,c] >= children[n];
 	
 subject to SignalsVsDemandInLink{(i,j) in LINKS}: # sum of signals in cable >= link demand
-	sum {c in CABLES} CablesInLink[i,j,c] * fibers[c] * signals_per_fiber[c]
+	sum {s in SPLITTERS, c in CABLES: (s,c) in PAIRS} CablesInLink[i,j,c] * fibers[c] * signals_per_fiber[c] #UWAGA
 	>= demand[i,j];
 	
 subject to OneCablePerLink{(i,j) in LINKS}: # max 1 CABLE PER NODE
-	sum {c in CABLES} CablesInLink[i,j,c] = 1;
+	sum {c in CABLES} CablesInLink[i,j,c] = 1;	
+	

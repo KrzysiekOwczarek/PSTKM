@@ -13,6 +13,17 @@ set CABLES :=
 
 set OLT_CABLE := 002-RB4-14101A20;
 
+set PAIRS := 
+#(XXX01, 001-RB4-14101A20)
+(XXX01, 002-RB4-14101A20)
+(FBT02, 002-RB4-14101A20)
+(FBT02, 001-RB4-14101A20)
+(PLC04, 002-RB4-14101A20)
+(PLC08, 002-RB4-14101A20)
+(PLC16, 002-RB4-14101A20)
+(PLC32, 002-RB4-14101A20)
+(PLC64, 002-RB4-14101A20);
+
 set LINKS :=
 (OLT, C1) 
 (OLT, C2)
@@ -30,14 +41,25 @@ A2 			2
 A3 			2
 A4	 		2;
 
-param: 		splitter_cost 	splitter_output :=
-XXX01		0				1
-FBT02		42.6			2
-PLC04		101.4			4
-PLC08		126.4			8
-PLC16		215.3			16
-PLC32		338.1			32
-PLC64		738				64;
+#param: 		splitter_cost 	splitter_output :=
+#XXX01		0				1
+#FBT02		42.6			2
+#PLC04		101.4			4
+#PLC08		126.4			8
+#PLC16		215.3			16
+#PLC32		338.1			32
+#PLC64		738				64;
+
+param: 						splitter_cost 	splitter_output :=
+#XXX01 001-RB4-14101A20		0				1
+XXX01 002-RB4-14101A20		0				1
+FBT02 002-RB4-14101A20		42.6			2
+FBT02 001-RB4-14101A20		42.6			2
+PLC04 002-RB4-14101A20		101.4			4
+PLC08 002-RB4-14101A20		126.4			8
+PLC16 002-RB4-14101A20		215.3			16
+PLC32 002-RB4-14101A20		338.1			32
+PLC64 002-RB4-14101A20		738				64;
 
 param: 				fiber_cost_per_km		fibers 		signals_per_fiber	:=
 001-RB4-14101A20	900						1			10
@@ -53,5 +75,4 @@ OLT C2 		2				4
 C1 	A1 		3				2
 C1 	A2 		4				2
 C2 	A3 		3				2
-C2 	A4 		2				2;	
-				
+C2 	A4 		2				2;
